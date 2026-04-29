@@ -7,6 +7,16 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
+  :root {
+    --card-width: 90px;
+    --card-height: 126px;
+    --card-radius: 8px;
+    --face-down-offset: 7px;
+    --face-up-offset: 32px;
+    --drag-overlap: -99px;
+    --tableau-gap: 5px;
+  }
+
   body {
     font-family: -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
     background: radial-gradient(ellipse at center, #1a7a4a 0%, #0d5c32 40%, #083d22 100%);
@@ -52,7 +62,12 @@
   .diff-btn .diff-label { font-size: 0.85rem; opacity: 0.8; }
 
   /* ===== 游戏界面 ===== */
-  #game-screen { display: none; min-height: 100vh; padding: 10px 12px; }
+  #game-screen {
+    display: none;
+    flex-direction: column;
+    min-height: 100vh;
+    padding: 10px 14px 12px;
+  }
 
   header {
     display: flex;
@@ -82,12 +97,16 @@
   #tableau {
     display: flex;
     justify-content: center;
-    gap: 6px;
-    margin-bottom: 16px;
+    align-items: flex-start;
+    gap: var(--tableau-gap);
+    flex: 1 1 auto;
+    padding: 4px 0 12px;
+    overflow-x: auto;
   }
   .column {
-    width: 80px;
-    min-height: 110px;
+    width: var(--card-width);
+    min-height: var(--card-height);
+    flex: 0 0 var(--card-width);
     position: relative;
     border-radius: 8px;
   }
@@ -95,19 +114,13 @@
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
     border-radius: 8px;
-    border: 2px dashed transparent;
-    transition: border-color 0.2s, background 0.2s;
-  }
-  .column.valid-drop .column-drop-zone {
-    border-color: rgba(255,255,0,0.5);
-    background: rgba(255,255,0,0.06);
   }
 
   /* ===== 卡牌 ===== */
   .card {
-    width: 80px;
-    height: 112px;
-    border-radius: 7px;
+    width: var(--card-width);
+    height: var(--card-height);
+    border-radius: var(--card-radius);
     position: absolute;
     left: 0;
     cursor: default;
@@ -146,7 +159,7 @@
   .card-front {
     width: 100%; height: 100%;
     background: linear-gradient(135deg, #ffffff 0%, #f8f8f8 40%, #f0f0f0 100%);
-    border-radius: 7px;
+    border-radius: var(--card-radius);
     border: 1px solid #c8c8c8;
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -1px 0 rgba(0,0,0,0.04);
     position: relative;
@@ -154,18 +167,18 @@
   }
   .card-front .corner {
     position: absolute;
-    font-size: 12px;
+    font-size: 13px;
     line-height: 1.1;
     font-weight: 700;
     text-align: center;
   }
-  .card-front .corner.top { top: 4px; left: 5px; }
-  .card-front .corner.bottom { bottom: 4px; right: 5px; transform: rotate(180deg); }
+  .card-front .corner.top { top: 5px; left: 6px; }
+  .card-front .corner.bottom { bottom: 5px; right: 6px; transform: rotate(180deg); }
   .card-front .center-suit {
     position: absolute;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 2rem;
+    font-size: 2.3rem;
     opacity: 0.85;
   }
   .card-front.red { color: #c0392b; }
@@ -174,29 +187,31 @@
   /* 卡牌背面 */
   .card-back {
     width: 100%; height: 100%;
-    background: linear-gradient(145deg, #1b2a6e 0%, #3a1c7e 40%, #5b1a7e 100%);
-    border-radius: 7px;
-    border: 1px solid rgba(255,255,255,0.12);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.35);
+    background:
+      radial-gradient(circle at 28% 18%, rgba(118, 190, 170, 0.28), transparent 28%),
+      linear-gradient(145deg, #0d2b3f 0%, #123f48 46%, #071d2d 100%);
+    border-radius: var(--card-radius);
+    border: 1px solid rgba(194,232,220,0.22);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 1px 3px rgba(0,0,0,0.35);
     position: relative;
     overflow: hidden;
   }
   .card-back::after {
     content: '';
     position: absolute;
-    inset: 3px;
-    border: 1.5px solid rgba(255,255,255,0.18);
-    border-radius: 4px;
+    inset: 4px;
+    border: 1.5px solid rgba(210,246,235,0.24);
+    border-radius: calc(var(--card-radius) - 3px);
     background:
       repeating-linear-gradient(
         45deg,
         transparent, transparent 4px,
-        rgba(255,255,255,0.04) 4px, rgba(255,255,255,0.04) 8px
+        rgba(210,246,235,0.07) 4px, rgba(210,246,235,0.07) 8px
       ),
       repeating-linear-gradient(
         -45deg,
         transparent, transparent 4px,
-        rgba(255,255,255,0.03) 4px, rgba(255,255,255,0.03) 8px
+        rgba(30,87,92,0.22) 4px, rgba(30,87,92,0.22) 8px
       );
   }
   .card-back::before {
@@ -204,8 +219,8 @@
     position: absolute;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 1.6rem;
-    opacity: 0.5;
+    font-size: 1.8rem;
+    opacity: 0.34;
     z-index: 1;
   }
 
@@ -230,16 +245,28 @@
     position: relative !important;
     left: 0 !important;
     top: 0 !important;
-    margin-top: -88px;
+    margin-top: var(--drag-overlap);
     box-shadow: 0 8px 24px rgba(0,0,0,0.4);
   }
   #drag-layer .card:first-child { margin-top: 0; }
 
-  /* ===== 发牌区（牌桌与完成区之间，居中） ===== */
+  /* ===== 底部控制区 ===== */
+  #bottom-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin-top: auto;
+    padding: 10px 10px 4px;
+    border-top: 1px solid rgba(255,255,255,0.12);
+    background: linear-gradient(to bottom, rgba(3,31,18,0), rgba(3,31,18,0.24));
+  }
+
+  /* ===== 发牌区 ===== */
   #stock-bar {
     display: flex;
-    justify-content: center;
-    padding: 12px 0 8px;
+    justify-content: flex-start;
+    min-width: 210px;
   }
   #stock-area {
     display: flex;
@@ -257,10 +284,12 @@
   #stock-area.empty { cursor: default; opacity: 0.3; }
   #stock-area.empty:hover { transform: none; background: transparent; }
   .stock-pile {
-    width: 56px; height: 44px;
+    width: 62px; height: 48px;
     border-radius: 6px;
-    background: linear-gradient(145deg, #1b2a6e, #4a148c);
-    border: 1px solid rgba(255,255,255,0.12);
+    background:
+      radial-gradient(circle at 30% 18%, rgba(118,190,170,0.25), transparent 30%),
+      linear-gradient(145deg, #0d2b3f, #123f48 55%, #071d2d);
+    border: 1px solid rgba(194,232,220,0.2);
     box-shadow:
       0 1px 0 rgba(255,255,255,0.05),
       0 2px 4px rgba(0,0,0,0.3);
@@ -268,7 +297,7 @@
     transition: transform 0.15s;
   }
   #stock-area:hover .stock-pile { transform: translateY(-2px); }
-  .stock-pile + .stock-pile { margin-left: -38px; }
+  .stock-pile + .stock-pile { margin-left: -42px; }
   .stock-label {
     color: rgba(255,255,255,0.75);
     font-size: 0.85rem;
@@ -279,15 +308,16 @@
   /* ===== 完成区 ===== */
   #completed-section {
     display: flex;
-    justify-content: center;
-    padding: 6px 20px 20px;
+    justify-content: flex-end;
   }
   #completed-area {
     display: flex;
     gap: 6px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
   }
   .completed-slot {
-    width: 56px; height: 44px;
+    width: 62px; height: 48px;
     border: 1.5px solid rgba(255,255,255,0.12);
     border-radius: 6px;
     display: flex; align-items: center; justify-content: center;
@@ -301,6 +331,8 @@
     border-color: rgba(255,215,0,0.55);
     color: rgba(255,215,0,0.9);
     box-shadow: 0 0 10px rgba(255,215,0,0.2);
+  }
+  .completed-slot.just-collected {
     animation: slotFill 0.4s ease-out;
   }
   @keyframes slotFill {
@@ -368,53 +400,75 @@
 
   /* ===== 发牌动画 ===== */
   .card.dealing {
-    animation: dealCard 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    --deal-index: 0;
+    animation: dealCard 0.56s cubic-bezier(0.18, 0.88, 0.24, 1) both;
+    animation-delay: calc(var(--deal-index) * 45ms);
+    pointer-events: none;
   }
   @keyframes dealCard {
-    from {
+    0% {
       opacity: 0;
-      transform: translateY(-80px) scale(0.7);
+      transform: translateY(138px) translateX(calc((4.5 - var(--deal-index)) * 15px)) rotate(-7deg) scale(0.72);
     }
-    50% {
-      opacity: 0.8;
-      transform: translateY(-10px) scale(1.02);
-    }
-    to {
+    62% {
       opacity: 1;
-      transform: translateY(0) scale(1);
+      transform: translateY(-8px) translateX(0) rotate(1.5deg) scale(1.035);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) translateX(0) rotate(0) scale(1);
     }
   }
 
   /* ===== 收牌动画 ===== */
   .card.collecting {
-    animation: collectCard 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    --collect-index: 0;
+    animation: collectCard 0.74s cubic-bezier(0.5, 0, 0.15, 1) both;
+    animation-delay: calc(var(--collect-index) * 22ms);
+    pointer-events: none;
   }
   @keyframes collectCard {
-    0% { transform: scale(1); opacity: 1; }
-    40% { transform: scale(1.08); opacity: 1; }
-    100% { transform: scale(0.2) translateY(-180px); opacity: 0; }
+    0% { transform: translateY(0) scale(1); opacity: 1; }
+    24% { transform: translateY(calc(var(--collect-index) * -9px)) scale(1.03); opacity: 1; }
+    72% { transform: translateY(96px) scale(0.78); opacity: 0.92; }
+    100% { transform: translateY(170px) scale(0.28); opacity: 0; }
   }
 
   /* ===== 响应式 ===== */
   @media (max-width: 880px) {
-    #tableau { gap: 3px; }
-    .column { width: 65px; min-height: 92px; }
-    .card { width: 65px; height: 91px; }
+    :root {
+      --card-width: 72px;
+      --card-height: 101px;
+      --face-down-offset: 6px;
+      --face-up-offset: 25px;
+      --drag-overlap: -79px;
+      --tableau-gap: 3px;
+    }
     .card-front .corner { font-size: 10px; }
     .card-front .center-suit { font-size: 1.5rem; }
-    #drag-layer .card { margin-top: -72px; }
     .stats { gap: 14px; font-size: 0.85rem; }
+    #bottom-controls { justify-content: center; flex-wrap: wrap; gap: 8px 18px; }
+    #stock-bar, #completed-section { justify-content: center; min-width: 0; }
+    #completed-area { justify-content: center; }
   }
   @media (max-width: 700px) {
-    #tableau { gap: 2px; }
-    .column { width: 52px; min-height: 74px; }
-    .card { width: 52px; height: 73px; }
+    :root {
+      --card-width: 56px;
+      --card-height: 78px;
+      --face-down-offset: 5px;
+      --face-up-offset: 20px;
+      --drag-overlap: -62px;
+      --tableau-gap: 2px;
+    }
     .card-front .corner { font-size: 8px; }
     .card-front .center-suit { font-size: 1.2rem; }
-    #drag-layer .card { margin-top: -58px; }
     header { flex-direction: column; gap: 8px; align-items: flex-start; }
     .stats { gap: 10px; font-size: 0.8rem; }
     .actions button { padding: 4px 10px; font-size: 0.78rem; }
+    #bottom-controls { padding: 8px 2px 2px; }
+    .stock-pile, .completed-slot { width: 48px; height: 38px; }
+    .stock-pile + .stock-pile { margin-left: -33px; }
+    .stock-label { font-size: 0.76rem; margin-left: 8px; }
   }
 </style>
 </head>
@@ -454,19 +508,20 @@
     </div>
     <div class="actions">
       <button id="undo-btn" onclick="game.undo()" disabled>↩ 撤销</button>
-      <button id="hint-btn" onclick="game.showHint()">💡 提示</button>
       <button onclick="showStartScreen()">🔄 新游戏</button>
     </div>
   </header>
 
   <div id="tableau"></div>
 
-  <div id="stock-bar">
-    <div id="stock-area" onclick="game.dealFromStock()"></div>
-  </div>
+  <div id="bottom-controls">
+    <div id="stock-bar">
+      <div id="stock-area" onclick="game.dealFromStock()"></div>
+    </div>
 
-  <div id="completed-section">
-    <div id="completed-area"></div>
+    <div id="completed-section">
+      <div id="completed-area"></div>
+    </div>
   </div>
 </div>
 
@@ -489,8 +544,8 @@
 /* ===== 常量 ===== */
 const SUITS = ['♠', '♥', '♦', '♣'];
 const RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
-const FACE_DOWN_OFFSET = 6;
-const FACE_UP_OFFSET = 28;
+const DEAL_ANIMATION_MS = 1040;
+const COLLECT_ANIMATION_MS = 1040;
 
 /* ===== 工具函数 ===== */
 function deepClone(obj) { return JSON.parse(JSON.stringify(obj)); }
@@ -498,6 +553,11 @@ function formatTime(sec) {
   const m = String(Math.floor(sec / 60)).padStart(2, '0');
   const s = String(sec % 60).padStart(2, '0');
   return `${m}:${s}`;
+}
+function cssPx(varName, fallback) {
+  const value = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+  const parsed = parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
 }
 
 /* ===== 主游戏类 ===== */
@@ -513,8 +573,8 @@ class SpiderSolitaire {
     this.timer = 0;
     this.timerInterval = null;
     this.dragData = null;
-    this.hintHighlight = null;
     this._animating = false;
+    this._completedPulseIndex = null;
   }
 
   /* -- 初始化 -- */
@@ -594,7 +654,6 @@ class SpiderSolitaire {
     this.score = state.score;
     this.moves = state.moves;
     document.getElementById('undo-btn').disabled = (this.history.length === 0);
-    this.clearHint();
     this.render();
   }
 
@@ -657,14 +716,21 @@ class SpiderSolitaire {
     // 标记收牌动画
     this._animating = true;
     const collectCards = cards.slice(start, start + 13);
-    collectCards.forEach(c => c._collecting = true);
+    collectCards.forEach((c, i) => {
+      c._collecting = true;
+      c._collectIndex = i;
+    });
     this.render();
 
     // 动画结束后移除
     setTimeout(() => {
-      collectCards.forEach(c => delete c._collecting);
+      collectCards.forEach(c => {
+        delete c._collecting;
+        delete c._collectIndex;
+      });
       this.tableau[col].splice(start, 13);
       this.completed++;
+      this._completedPulseIndex = this.completed - 1;
       this.score += 100;
 
       // 翻开新顶牌
@@ -678,9 +744,19 @@ class SpiderSolitaire {
       // 检查胜利
       if (this.completed === 8) {
         setTimeout(() => this._showWin(), 400);
+      } else {
+        this._checkAllComplete();
       }
-    }, 500);
+    }, COLLECT_ANIMATION_MS);
     return true;
+  }
+
+  _checkAllComplete() {
+    if (this._animating) return false;
+    for (let i = 0; i < 10; i++) {
+      if (this._checkComplete(i)) return true;
+    }
+    return false;
   }
 
   /* -- 从牌堆发牌 -- */
@@ -695,103 +771,30 @@ class SpiderSolitaire {
       }
     }
     this._saveState();
-    this.clearHint();
+    this._animating = true;
     for (let i = 0; i < 10; i++) {
       const card = this.stock.pop();
       card.faceUp = true;
       card._dealing = true;
+      card._dealIndex = i;
       this.tableau[i].push(card);
     }
     this.moves++;
-    // 发牌后检查每列是否完成
-    for (let i = 0; i < 10; i++) {
-      this._checkComplete(i);
-    }
     this.render();
-    // 延迟清除动画标记
+
+    // 发牌动画结束后再检查收牌，避免两套动画互相打架。
     setTimeout(() => {
       for (let i = 0; i < 10; i++) {
         const col = this.tableau[i];
         if (col.length > 0) {
           delete col[col.length - 1]._dealing;
+          delete col[col.length - 1]._dealIndex;
         }
       }
-    }, 500);
-  }
-
-  /* -- 提示系统 -- */
-  showHint() {
-    this.clearHint();
-    // 寻找可行移动
-    const move = this._findHint();
-    if (!move) {
-      if (this.stock.length > 0) {
-        showToast('没有可用移动，请点击牌堆发牌');
-      } else {
-        showToast('没有找到可用的移动');
-      }
-      return;
-    }
-
-    // 高亮提示的牌
-    const fromCol = document.querySelectorAll('.column')[move.fromCol];
-    const cards = fromCol.querySelectorAll('.card');
-    for (let i = move.startIdx; i < this.tableau[move.fromCol].length; i++) {
-      cards[i].querySelector('.card-front').style.boxShadow = '0 0 12px 3px rgba(255,255,0,0.8)';
-      cards[i].querySelector('.card-front').style.border = '2px solid gold';
-    }
-
-    const toCol = document.querySelectorAll('.column')[move.toCol];
-    toCol.querySelector('.column-drop-zone').style.borderColor = 'rgba(255,255,0,0.6)';
-    toCol.querySelector('.column-drop-zone').style.background = 'rgba(255,255,0,0.1)';
-
-    this.hintHighlight = { fromCol, toCol, startIdx: move.startIdx };
-    this.score = Math.max(0, this.score - 1);
-    document.getElementById('score-val').textContent = this.score;
-  }
-
-  clearHint() {
-    if (!this.hintHighlight) return;
-    const { fromCol, toCol } = this.hintHighlight;
-    fromCol.querySelectorAll('.card-front').forEach(el => {
-      el.style.boxShadow = '';
-      el.style.border = '';
-    });
-    toCol.querySelector('.column-drop-zone').style.borderColor = '';
-    toCol.querySelector('.column-drop-zone').style.background = '';
-    this.hintHighlight = null;
-  }
-
-  _findHint() {
-    let bestMove = null;
-    let bestScore = -Infinity;
-
-    for (let fromCol = 0; fromCol < 10; fromCol++) {
-      const col = this.tableau[fromCol];
-      for (let startIdx = col.length - 1; startIdx >= 0; startIdx--) {
-        if (!this._canDrag(fromCol, startIdx)) continue;
-        const dragCards = col.slice(startIdx);
-
-        for (let toCol = 0; toCol < 10; toCol++) {
-          if (toCol === fromCol) continue;
-          if (!this._canMove(dragCards, toCol)) continue;
-
-          // 评分：优先同花色连接、能翻开暗牌、非空→空移动
-          let score = 0;
-          const target = this.tableau[toCol];
-          if (target.length > 0 && target[target.length - 1].suit === dragCards[0].suit) score += 50;
-          if (startIdx > 0 && !col[startIdx - 1].faceUp) score += 20;
-          if (target.length > 0) score += 10;
-          if (startIdx === 0 && target.length === 0) score -= 5; // 空到空没意义
-
-          if (score > bestScore) {
-            bestScore = score;
-            bestMove = { fromCol, toCol, startIdx };
-          }
-        }
-      }
-    }
-    return bestMove;
+      this._animating = false;
+      this.render();
+      this._checkAllComplete();
+    }, DEAL_ANIMATION_MS);
   }
 
   /* -- 胜利 -- */
@@ -815,6 +818,9 @@ class SpiderSolitaire {
   _renderTableau() {
     const container = document.getElementById('tableau');
     container.innerHTML = '';
+    const cardHeight = cssPx('--card-height', 126);
+    const faceDownOffset = cssPx('--face-down-offset', 7);
+    const faceUpOffset = cssPx('--face-up-offset', 32);
 
     for (let colIdx = 0; colIdx < 10; colIdx++) {
       const col = this.tableau[colIdx];
@@ -832,11 +838,11 @@ class SpiderSolitaire {
         cardEl.style.top = top + 'px';
         cardEl.style.zIndex = cardIdx + 1;
         colEl.appendChild(cardEl);
-        top += card.faceUp ? FACE_UP_OFFSET : FACE_DOWN_OFFSET;
+        top += card.faceUp ? faceUpOffset : faceDownOffset;
       });
 
       // 设置列最小高度
-      colEl.style.minHeight = (top + 112) + 'px';
+      colEl.style.minHeight = (top + cardHeight) + 'px';
       container.appendChild(colEl);
     }
   }
@@ -849,6 +855,8 @@ class SpiderSolitaire {
     el.className = cls;
     el.dataset.col = colIdx;
     el.dataset.idx = cardIdx;
+    if (card._dealing) el.style.setProperty('--deal-index', card._dealIndex || 0);
+    if (card._collecting) el.style.setProperty('--collect-index', card._collectIndex || 0);
 
     if (card.faceUp) {
       const isRed = card.suit === '♥' || card.suit === '♦';
@@ -875,10 +883,13 @@ class SpiderSolitaire {
     area.innerHTML = '';
     for (let i = 0; i < 8; i++) {
       const slot = document.createElement('div');
-      slot.className = 'completed-slot' + (i < this.completed ? ' done' : '');
+      let cls = 'completed-slot' + (i < this.completed ? ' done' : '');
+      if (i === this._completedPulseIndex) cls += ' just-collected';
+      slot.className = cls;
       slot.textContent = i < this.completed ? SUITS[i % this.suitCount] : '♠';
       area.appendChild(slot);
     }
+    this._completedPulseIndex = null;
   }
 
   _renderStock() {
@@ -906,7 +917,6 @@ class SpiderSolitaire {
   startDrag(e, colIdx, cardIdx) {
     if (this._animating) return;
     if (!this._canDrag(colIdx, cardIdx)) return;
-    this.clearHint();
 
     const cards = this.tableau[colIdx].slice(cardIdx);
     const startEl = e.target.closest('.card');
@@ -938,9 +948,6 @@ class SpiderSolitaire {
     }
 
     this.dragData = { fromCol: colIdx, startIdx: cardIdx, offsetX, offsetY, cards };
-
-    // 高亮可放置的列
-    this._highlightDropTargets(cards);
   }
 
   moveDrag(e) {
@@ -969,7 +976,6 @@ class SpiderSolitaire {
 
     // 清理
     document.getElementById('drag-layer').innerHTML = '';
-    document.querySelectorAll('.column.valid-drop').forEach(el => el.classList.remove('valid-drop'));
     this.dragData = null;
     this.render();
   }
@@ -982,15 +988,6 @@ class SpiderSolitaire {
     }
     return null;
   }
-
-  _highlightDropTargets(cards) {
-    const columns = document.querySelectorAll('.column');
-    for (let i = 0; i < 10; i++) {
-      if (this._canMove(cards, i) && i !== this.dragData.fromCol) {
-        columns[i].classList.add('valid-drop');
-      }
-    }
-  }
 }
 
 /* ===== 全局变量 ===== */
@@ -999,7 +996,7 @@ let game = null;
 /* ===== 开始游戏 ===== */
 function startGame(suitCount) {
   document.getElementById('start-screen').style.display = 'none';
-  document.getElementById('game-screen').style.display = 'block';
+  document.getElementById('game-screen').style.display = 'flex';
   document.getElementById('win-overlay').classList.remove('show');
 
   game = new SpiderSolitaire(suitCount);
